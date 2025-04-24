@@ -1,0 +1,6 @@
+mysql-connector-python
+pyspark
+kafka-python
+python-dotenv
+pymongo
+redis
