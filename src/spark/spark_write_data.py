@@ -3,11 +3,11 @@ from typing import Dict
 from database.mysql_connect import MySQLConnect
 
 class SparkWriteDatabases:
-    def __init__(self, spark: SparkSession, db_config: Dict[str, str]):
+    def __init__(self, spark: SparkSession, db_config: Dict):
         self.spark =  spark
         self.db_config = db_config
 
-    def spark_write_mysql(self, df: DataFrame, table_name: str, jdbc_url: str, config: Dict[str,str], mode : str = "append"):
+    def spark_write_mysql(self, df: DataFrame, table_name: str, jdbc_url: str, config: Dict, mode : str = "append"):
 
         try:
             mysql_client = MySQLConnect(config)

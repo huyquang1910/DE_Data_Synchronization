@@ -54,7 +54,8 @@ def main():
         col("repo.name").alias("name"),
         col("repo.url").alias("url"),
     )
-    df.show(truncate = False)
-
+    # df.show(truncate = False)
+    df_write = SparkWriteDatabases(spark_write_database, db_config)
+    df_write.spark_write_mysql(df_write_table_Users, "Users", mode = "append")
 if __name__== "__main__":
     main()
