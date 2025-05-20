@@ -3,30 +3,38 @@ from config.database_config import get_database_config
 from config.spark_config import SparkConnect
 from pyspark.sql.types import *
 from pyspark.sql.functions import col
+from config.spark_config import get_spark_config
 
 
 def main():
-    db_config = get_database_config()
-    filejars = [
-        "C:/Users/chimo/PycharmProjects/DE_ETL/lib/mysql-connector-j-9.3.0.jar"
-    ]
-    spark_conf = {
-        "spark.jar.package": (
-            "mysql:mysql-connector-java:9.3.0"
-        )
-    }
+    db_configs = get_database_config()
 
-    spark_write_database = SparkConnect(
+    jar = [
+        db_configs["mysql"].jar_path
+    ]
+
+
+
+    # filejars = [
+    #     "C:/Users/chimo/PycharmProjects/DE_ETL/lib/mysql-connector-j-9.3.0.jar"
+    # ]
+    # spark_conf = {
+    #     "spark.jar.package": (
+    #         "mysql:mysql-connector-java:9.3.0"
+    #     )
+    # }
+
+    spark_connect = SparkConnect(
         app_name= 'de',
         master_url='local[*]',
         executor_memory= '1g',
         executor_cores= 1,
         drive_memory= '1g',
         num_executors= 1,
-        jars= filejars,
-        spark_conf= spark_conf,
+        jars= jar,
+        # spark_conf= spark_conf,
         log_level= 'INFO'
-    ).spark
+    )
 
     schema = StructType([
         StructField('actor', StructType([
@@ -42,11 +50,12 @@ def main():
             StructField('url', StringType(), True),
         ]), True)
     ])
-    df = spark_write_database.read.schema(schema).json("C:/Users/chimo/PycharmProjects/DE_ETL/data/2015-03-01-17.json")
+    df = spark_connect.spark.read.schema(schema).json("C:/Users/chimo/PycharmProjects/DE_ETL/data/2015-03-01-17.json")
     df_write_table_Users = df.select(
         col("actor.id"). alias("user_id"),
         col("actor.login").alias("login"),
         col("actor.gravatar_id").alias("gravatar_id"),
+        col("actor.avatar_url").alias("avatar_url"),
         col("actor.url").alias("url"),
     )
     df_write_table_Repositories = df.select(
@@ -55,7 +64,11 @@ def main():
         col("repo.url").alias("url"),
     )
     # df.show(truncate = False)
-    df_write = SparkWriteDatabases(spark_write_database, db_config)
-    df_write.spark_write_mysql(df_write_table_Users, "Users", mode = "append")
+
+    spark_configs = get_spark_config()
+    df_write = SparkWriteDatabases(spark_connect.spark, spark_configs)
+    df_write.write_all_databases(df_write_table_Users, mode = "append")
+
+    spark_connect.spark.stop()
 if __name__== "__main__":
     main()

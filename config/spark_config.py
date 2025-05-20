@@ -1,6 +1,7 @@
 from pyspark.sql import SparkSession
 from typing import Optional, List, Dict
 import os
+from config.database_config import get_database_config
 
 class SparkConnect:
     def __init__(self,
@@ -72,4 +73,28 @@ class SparkConnect:
     # data= [["dat",18],["sonbui",20],["toan",25]]
     # df=spark.createDataFrame(data,["name","age"])
     # df.show()
+def get_spark_config() -> Dict:
+    db_configs = get_database_config()
+    return {
+        "mysql":{
+            "table": db_configs["mysql"].table,
+            "jdbc_url": "jdbc:mysql://{}:{}/{}".format(db_configs["mysql"].host,db_configs["mysql"].port, db_configs["mysql"].database),
+            "config": {
+                "host": db_configs["mysql"].host,
+                "port": db_configs["mysql"].port,
+                "user": db_configs["mysql"].user,
+                "password": db_configs["mysql"].password,
+                "database": db_configs["mysql"].database,
+            }
+        },
+        "mongodb":{
 
+        },
+        "redis":{
+
+
+        }
+    }
+#
+# if __name__== "__main__":
+#     print(get_spark_config())
