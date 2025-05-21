@@ -9,18 +9,18 @@ from database.schema_manager import create_redis_schema, validate_redis_schema
 
 def main(config):
     #MongoDB
-    with MongoDBConnect(config["mongodb"].uri,config["mongodb"].db_name) as mongo_client:
-        create_mongodb_schema(mongo_client.connect())
-        mongo_client.db.Users.insert_one({
-            "user_id":Int64(1),
-            "login":"ostcar",
-            "gravatar_id":"",
-            "avatar_url": "https://avatars.githubusercontent.com/u/977937?",
-            "url":"https://api.github.com/users/ostcar",
-
-        })
-        print("---------Inserted to MongoDB------")
-        validate_mongodb_schema(mongo_client.connect())
+    # with MongoDBConnect(config["mongodb"].uri,config["mongodb"].db_name) as mongo_client:
+    #     create_mongodb_schema(mongo_client.connect())
+    #     mongo_client.db.Users.insert_one({
+    #         "user_id":Int64(1),
+    #         "login":"ostcar",
+    #         "gravatar_id":"",
+    #         "avatar_url": "https://avatars.githubusercontent.com/u/977937?",
+    #         "url":"https://api.github.com/users/ostcar",
+    #
+    #     })
+    #     print("---------Inserted to MongoDB------")
+    #     validate_mongodb_schema(mongo_client.connect())
 
     #MySQL
     with MySQLConnect(config["mysql"].host, config["mysql"].port, config["mysql"].user, config["mysql"].password) as mysql_client:
@@ -34,9 +34,9 @@ def main(config):
 
     #
     #Redis
-    with RedisConnect(config["redis"].host,config["redis"].port,config["redis"].user,config["redis"].password,config["redis"].database ) as redis_client:
-        create_redis_schema(redis_client.connect())
-        validate_redis_schema(redis_client.connect())
+    # with RedisConnect(config["redis"].host,config["redis"].port,config["redis"].user,config["redis"].password,config["redis"].database ) as redis_client:
+    #     create_redis_schema(redis_client.connect())
+    #     validate_redis_schema(redis_client.connect())
 if __name__== "__main__":
     config = get_database_config()
     main(config)

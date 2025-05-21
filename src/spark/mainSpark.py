@@ -38,11 +38,11 @@ def main():
 
     schema = StructType([
         StructField('actor', StructType([
-            StructField('id', LongType(), False),
-            StructField('login', StringType(), False),
-            StructField('gravatar_id', StringType(), False),
-            StructField('url', StringType(), False),
-            StructField('avatar_url', StringType(), False),
+            StructField('id', IntegerType(), False),
+            StructField('login', StringType(), True),
+            StructField('gravatar_id', StringType(), True),
+            StructField('url', StringType(), True),
+            StructField('avatar_url', StringType(), True),
         ]), True),
         StructField('repo', StructType([
             StructField('id', LongType(), False),
@@ -58,6 +58,7 @@ def main():
         col("actor.avatar_url").alias("avatar_url"),
         col("actor.url").alias("url"),
     )
+    # df_write_table_Users.cache()
     df_write_table_Repositories = df.select(
         col("repo.id").alias("repo_id"),
         col("repo.name").alias("name"),
@@ -69,6 +70,6 @@ def main():
     df_write = SparkWriteDatabases(spark_connect.spark, spark_configs)
     df_write.write_all_databases(df_write_table_Users, mode = "append")
 
-    spark_connect.spark.stop()
+    spark_connect.stop()
 if __name__== "__main__":
     main()
