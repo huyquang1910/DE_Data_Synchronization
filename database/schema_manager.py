@@ -10,7 +10,7 @@ def create_mongodb_schema(db):
             "required": ["user_id", "login"],
             "properties":{
                 "user_id":{
-                    "bsonType": "long"
+                    "bsonType": "int"
                 },
                 "login":{
                     "bsonType":"string"
@@ -27,7 +27,7 @@ def create_mongodb_schema(db):
             }
     }
     })
-    db.Users.create_index("user_id", unique = True)
+    # db.Users.create_index("user_id", unique = True)
 def validate_mongodb_schema(db):
     collections= db.list_collection_names()
     # print(collections)

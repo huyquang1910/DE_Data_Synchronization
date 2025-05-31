@@ -16,7 +16,7 @@ class MongoDBConfig(DatabaseConfig):
     uri : str
     db_name : str
     jar_path: Optional[str] = None
-    collection: str = "users"  #default
+    collection: str = "Users"  #default
 @dataclass
 class MySQLConfig(DatabaseConfig):
     host : str

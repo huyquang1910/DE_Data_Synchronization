@@ -11,12 +11,12 @@ class SparkConnect:
                  executor_cores: Optional[int] = 2,
                  drive_memory: Optional[str] = "2g",
                  num_executors: Optional[int] = 3,
-                 jars: Optional[List[str]] = None,
+                 jar_packages: Optional[List[str]] = None,
                  spark_conf: Optional[Dict[str, str]] = None,
                  log_level: str = "WARN"
                  ):
         self.app_name = app_name
-        self.spark = self.create_spark_session(master_url, executor_memory, executor_cores, drive_memory, num_executors, jars, spark_conf, log_level)
+        self.spark = self.create_spark_session(master_url, executor_memory, executor_cores, drive_memory, num_executors,  jar_packages, spark_conf, log_level)
 
 
     def create_spark_session(
@@ -27,7 +27,7 @@ class SparkConnect:
             executor_cores: Optional[int]=2,
             drive_memory: Optional[str]= "2g",
             num_executors: Optional[int]= 3,
-            jars: Optional[List[str]]=None,
+            jar_packages: Optional[List[str]]=None,
             spark_conf: Optional[Dict[str, str]]= None,
             log_level: str= "WARN"
     ) ->SparkSession:
@@ -43,9 +43,13 @@ class SparkConnect:
             builder.config("spark.driver.memory", drive_memory)
         if num_executors:
             builder.config("spark.executor.instances", num_executors)
-        if jars:
-            jars_path= ",".join([os.path.abspath(jar) for jar in jars])
-            builder.config("spark.jars", jars_path)
+        # if jars:
+        #     jars_path= ",".join([os.path.abspath(jar) for jar in jars])
+        #     builder.config("spark.jars", jars_path)
+        if jar_packages:
+            jar_packages_url = ",".join([jar_package for jar_package in jar_packages])
+            builder.config("spark.jars.packages", jar_packages_url)
+
         if spark_conf:
             for key, value in spark_conf.items():
                 builder.config(key, value)
@@ -59,6 +63,11 @@ class SparkConnect:
             self.spark.stop()
             print("-------Stop spark session------")
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.stop()
     # spark =  create_spark_session(
     #     app_name = "DE_ETL",
     #     master_url = "local[*]",
@@ -88,7 +97,9 @@ def get_spark_config() -> Dict:
             }
         },
         "mongodb":{
-
+            "database": db_configs["mongodb"].db_name,
+            "collection": db_configs["mongodb"].collection,
+            "uri": db_configs["mongodb"].uri
         },
         "redis":{
 

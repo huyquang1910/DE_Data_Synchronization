@@ -28,6 +28,17 @@ class SparkWriteDatabases:
             .save()
         print(f"-----Spark write data to mysql in table :{table_name}------")
 
+    def spark_write_mongodb(self,df: DataFrame, database:str, collection:str, uri: str, mode: str = "append"):
+        df.write \
+            .format("mongo") \
+            .option("uri", uri) \
+            .option("database", database) \
+            .option("collection", collection) \
+            .mode(mode) \
+            .save()
+        print(f"-----Spark write data to MongoDB in collection :{database}.{collection}------")
+
+
     def write_all_databases(self, df: DataFrame, mode: str = "append"):
         self.spark_write_mysql(
             df,
@@ -35,5 +46,13 @@ class SparkWriteDatabases:
             self.db_config["mysql"]["jdbc_url"],
             self.db_config["mysql"]["config"],
             mode
+        )
+        self.spark_write_mongodb(
+            df,
+            self.db_config["mongodb"]["database"],
+            self.db_config["mongodb"]["collection"],
+            self.db_config["mongodb"]["uri"],
+            mode
+
         )
         print("-------Write success to all databases-------")

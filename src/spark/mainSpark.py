@@ -9,10 +9,16 @@ from config.spark_config import get_spark_config
 def main():
     db_configs = get_database_config()
 
-    jar = [
-        db_configs["mysql"].jar_path
-    ]
+    # jar = [
+    #     db_configs["mysql"].jar_path,
+    #     db_configs["mongodb"].jar_path,
+    # ]
 
+
+    jars = [
+        "mysql:mysql-connector-java:8.0.33",
+        "org.mongodb.spark:mongo-spark-connector_2.12:3.0.1"
+    ]
 
 
     # filejars = [
@@ -31,7 +37,7 @@ def main():
         executor_cores= 1,
         drive_memory= '1g',
         num_executors= 1,
-        jars= jar,
+        jar_packages= jars,
         # spark_conf= spark_conf,
         log_level= 'INFO'
     )
