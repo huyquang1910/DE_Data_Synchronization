@@ -2,7 +2,7 @@ from spark_write_data import SparkWriteDatabases
 from config.database_config import get_database_config
 from config.spark_config import SparkConnect
 from pyspark.sql.types import *
-from pyspark.sql.functions import col
+from pyspark.sql.functions import col,lit
 from config.spark_config import get_spark_config
 
 
@@ -57,13 +57,13 @@ def main():
         ]), True)
     ])
     df = spark_connect.spark.read.schema(schema).json("C:/Users/chimo/PycharmProjects/DE_ETL/data/2015-03-01-17.json")
-    df_write_table_Users = df.select(
-        col("actor.id"). alias("user_id"),
-        col("actor.login").alias("login"),
-        col("actor.gravatar_id").alias("gravatar_id"),
-        col("actor.avatar_url").alias("avatar_url"),
-        col("actor.url").alias("url"),
-    )
+    # df_write_table_Users = df.select(
+    #     col("actor.id"). alias("user_id"),
+    #     col("actor.login").alias("login"),
+    #     col("actor.gravatar_id").alias("gravatar_id"),
+    #     col("actor.avatar_url").alias("avatar_url"),
+    #     col("actor.url").alias("url"),
+    # )
     # df_write_table_Users.cache()
     df_write_table_Repositories = df.select(
         col("repo.id").alias("repo_id"),
@@ -71,11 +71,20 @@ def main():
         col("repo.url").alias("url"),
     )
     # df.show(truncate = False)
-
+    df_write_table_Users = df.withColumn("spark_temp", lit("spark_write")).select(
+        col("actor.id"). alias("user_id"),
+        col("actor.login").alias("login"),
+        col("actor.gravatar_id").alias("gravatar_id"),
+        col("actor.avatar_url").alias("avatar_url"),
+        col("actor.url").alias("url"),
+        col("spark_temp").alias("spark_temp")
+    )
     spark_configs = get_spark_config()
     df_write = SparkWriteDatabases(spark_connect.spark, spark_configs)
     df_write.write_all_databases(df_write_table_Users, mode = "append")
 
+    df_validate = SparkWriteDatabases(spark_connect.spark, spark_configs)
+    df_validate.validate_spark_mysql(df_write_table_Users,spark_configs["mysql"]["table"],spark_configs["mysql"]["jdbc_url"],spark_configs["mysql"]["config"])
     spark_connect.stop()
 if __name__== "__main__":
     main()

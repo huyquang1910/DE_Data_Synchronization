@@ -28,10 +28,10 @@ def main(config):
         connection = mysql_client.connection
         cursor = mysql_client.cursor
         create_mysql_schema(connection, cursor)
-        # cursor.execute(f"INSERT INTO Users(user_id, login, gravatar_id,avatar_url, url ) VALUES (%s, %s, %s, %s, %s)", (1,"ostcar","https://avatars.githubusercontent.com/u/977937?", "https://api.github.com/users/ostcar",""))
-        # connection.commit()
-        # print("------Inserted data to MySQL-------")
-        # validate_mysql_schema(cursor)
+        cursor.execute(f"INSERT INTO Users(user_id, login, gravatar_id,avatar_url, url ) VALUES (%s, %s, %s, %s, %s)", (1,"huyquang1910","https://avatars.githubusercontent.com/u/977937?", "https://api.github.com/users/ostcar",""))
+        connection.commit()
+        print("------Inserted data to MySQL-------")
+        validate_mysql_schema(cursor)
 
     #
     #Redis
