@@ -12,16 +12,16 @@ def main(config):
     with MongoDBConnect(config["mongodb"].uri,config["mongodb"].db_name) as mongo_client:
         create_mongodb_schema(mongo_client.connect())
         print("-----Connected to MongoDB----")
-        # mongo_client.db.Users.insert_one({
-        #     "user_id":Int64(1),
-        #     "login":"ostcar",
-        #     "gravatar_id":"",
-        #     "avatar_url": "https://avatars.githubusercontent.com/u/977937?",
-        #     "url":"https://api.github.com/users/ostcar",
-        #
-        # })
-        # print("---------Inserted to MongoDB------")
-        # validate_mongodb_schema(mongo_client.connect())
+        mongo_client.db.Users.insert_one({
+            "user_id":1,
+            "login":"ostcar",
+            "gravatar_id":"",
+            "avatar_url": "https://avatars.githubusercontent.com/u/977937?",
+            "url":"https://api.github.com/users/ostcar",
+
+        })
+        print("---------Inserted to MongoDB------")
+        validate_mongodb_schema(mongo_client.connect())
 
     #MySQL
     with MySQLConnect(config["mysql"].host, config["mysql"].port, config["mysql"].user, config["mysql"].password) as mysql_client:

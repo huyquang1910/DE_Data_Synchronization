@@ -85,6 +85,7 @@ def main():
 
     df_validate = SparkWriteDatabases(spark_connect.spark, spark_configs)
     df_validate.validate_spark_mysql(df_write_table_Users,spark_configs["mysql"]["table"],spark_configs["mysql"]["jdbc_url"],spark_configs["mysql"]["config"])
+    df_validate.validate_spark_mongodb(df_write_table_Users, spark_configs["mongodb"]["uri"], spark_configs["mongodb"]["database"] ,spark_configs["mongodb"]["collection"] )
     spark_connect.stop()
 if __name__== "__main__":
     main()

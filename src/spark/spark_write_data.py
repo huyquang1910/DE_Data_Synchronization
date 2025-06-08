@@ -1,7 +1,11 @@
 from pyspark.sql import DataFrame, SparkSession
 from typing import Dict
+from pyspark.sql.functions import *
 from database.mysql_connect import MySQLConnect
 from config.spark_config import get_spark_config
+from database.mongodb_connect import MongoDBConnect
+from config.database_config import get_database_config
+
 
 
 class SparkWriteDatabases:
@@ -73,7 +77,7 @@ class SparkWriteDatabases:
         else:
             subtract_dataframe(df_write, df_read)
             print("----Insert missing records success by using Spark-------")
-
+        #Drop column spark_temp in MySQL
         try:
             with MySQLConnect(config["host"], config["port"], config["user"], config["password"]) as mysql_client:
                 connection, cursor = mysql_client.connection, mysql_client.cursor
@@ -95,6 +99,56 @@ class SparkWriteDatabases:
             .mode(mode) \
             .save()
         print(f"-----Spark write data to MongoDB in collection :{database}.{collection}------")
+
+    def validate_spark_mongodb(self,df_write: DataFrame, uri: str,  database:str, collection:str, mode: str = "append"):
+        query = {"spark_temp": "spark_write"}
+
+        df_read = self.spark.read \
+            .format("mongo") \
+            .option("uri", uri) \
+            .option("database", database) \
+            .option("collection", collection) \
+            .option("pipeline", str([{"$match": query}])) \
+            .load()
+        df_read.show()
+        df_read = df_read.select(
+            col("user_id"),
+            col("login"),
+            col("gravatar_id"),
+            col("avatar_url"),
+            col("url"),
+            col("spark_temp")
+    )
+        df_read.show(5)
+        df_write.show(5)
+
+        def subtract_dataframe(df_write: DataFrame, df_read: DataFrame):
+            result = df_write.exceptAll(df_read)
+            print(f"---result records:{result.count()} --- ")
+            if not result.isEmpty():
+                result.write \
+                    .format("mongo") \
+                    .option("uri", uri) \
+                    .option("database", database) \
+                    .option("collection", collection) \
+                    .mode(mode) \
+                    .save()
+
+        if (df_write.count()) == (df_read.count()):
+            print(f"----validate {df_write.count()} records success------")
+            subtract_dataframe(df_write, df_read)
+            print(f"-------validate data of records success----")
+        else:
+            subtract_dataframe(df_write, df_read)
+            print("----Insert missing records success by using Spark-------")
+        # Drop column spark_temp in MongoDB
+        config = get_database_config()
+        with MongoDBConnect(config["mongodb"].uri, config["mongodb"].db_name) as mongo_client:
+            # collection = mongo_client.db[f"{collection}"]
+            mongo_client.db.Users.update_many({},{"$unset":{"spark_temp": ""}})
+            # collection.update_many({},{"$unset":{"spark_temp": ""}})
+            print("-----Deleted column spark_temp in MongoDB------")
+
 
     def write_all_databases(self, df: DataFrame, mode: str = "append"):
         self.spark_write_mysql(
