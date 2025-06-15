@@ -142,11 +142,11 @@ class SparkWriteDatabases:
             subtract_dataframe(df_write, df_read)
             print("----Insert missing records success by using Spark-------")
         # Drop column spark_temp in MongoDB
-        config = get_database_config()
-        with MongoDBConnect(config["mongodb"].uri, config["mongodb"].db_name) as mongo_client:
-            # collection = mongo_client.db[f"{collection}"]
-            mongo_client.db.Users.update_many({},{"$unset":{"spark_temp": ""}})
-            # collection.update_many({},{"$unset":{"spark_temp": ""}})
+        # config = get_database_config()
+        with MongoDBConnect(uri, database) as mongo_client:
+            collection = mongo_client.db[f"{collection}"]
+            # mongo_client.db.Users.update_many({},{"$unset":{"spark_temp": ""}})
+            collection.update_many({},{"$unset":{"spark_temp": ""}})
             print("-----Deleted column spark_temp in MongoDB------")
 
 
@@ -164,6 +164,22 @@ class SparkWriteDatabases:
             self.db_config["mongodb"]["collection"],
             self.db_config["mongodb"]["uri"],
             mode
-
         )
-        print("-------Write success to all databases-------")
+        print("-------Spark write success to all databases-------")
+
+    def validate_spark(self, df: DataFrame, mode: str = "append"):
+        self.validate_spark_mysql(
+            df,
+            self.db_config["mysql"]["table"],
+            self.db_config["mysql"]["jdbc_url"],
+            self.db_config["mysql"]["config"],
+            mode)
+
+        self.validate_spark_mongodb(
+            df,
+            self.db_config["mongodb"]["uri"],
+            self.db_config["mongodb"]["database"],
+            self.db_config["mongodb"]["collection"],
+            mode
+        )
+        print("-------Validate all databases success with Spark-------")
